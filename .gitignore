@@ -1,0 +1,12 @@
+env
+venv
+env.txt
+*.pyc
+*.zip
+settings.json
+launch.json
+.coverage
+**/htmlcov/
+.DS_Store
+.idea
+**/target/
