@@ -10,3 +10,4 @@ launch.json
 .DS_Store
 .idea
 **/target/
+**/deploy/

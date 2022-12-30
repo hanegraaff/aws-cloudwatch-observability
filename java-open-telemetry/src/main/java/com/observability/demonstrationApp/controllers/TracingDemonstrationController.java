@@ -34,7 +34,7 @@ public class TracingDemonstrationController {
         }
     }
 
-    @GetMapping("/gotoall/")
+    @RequestMapping("/gotoall/")
     public String processMultipleURLs() throws Exception {
         try {
             downloadWebData("https://amazon.com");

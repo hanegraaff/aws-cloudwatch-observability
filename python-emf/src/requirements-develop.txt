@@ -1,0 +1,2 @@
+boto3
+aws-embedded-metrics
