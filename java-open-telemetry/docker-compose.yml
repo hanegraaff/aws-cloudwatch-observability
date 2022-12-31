@@ -18,6 +18,5 @@ services:
     environment:
       - AWS_REGION=us-east-1
       - AWS_PROFILE=default
-      - OTEL_JAVAAGENT_CONFIGURATION_FILE=open-telemetry-java-agent.properties
     volumes:
       - ~/.aws:/root/.aws

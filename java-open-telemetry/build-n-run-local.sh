@@ -1,7 +1,10 @@
 #!/bin/sh
 
+mvn clean
 mvn package
+
 cd target
 
-OTEL_RESOURCE_ATTRIBUTES=service.name=demonstrationApp,service.namespace=com.hanegraaff.observability java -javaagent:aws-opentelemetry-agent-1.20.0.jar \
-     -jar demonstrationApp-0.0.1-SNAPSHOT.jar
+curl -LJO -o aws-opentelemetry-agent.jar github.com/aws-observability/aws-otel-java-instrumentation/releases/download/v1.20.0/aws-opentelemetry-agent.jar
+OTEL_RESOURCE_ATTRIBUTES=service.name=demonstrationApp,service.namespace=com.hanegraaff.observability java -javaagent:aws-opentelemetry-agent.jar \
+     -jar demonstrationApp-1.0.0.jar
