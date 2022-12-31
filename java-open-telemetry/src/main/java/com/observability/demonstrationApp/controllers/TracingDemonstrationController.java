@@ -1,81 +1,94 @@
 package com.observability.demonstrationApp.controllers;
 
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
-//import org.springframework.web.bind.annotation.GetMapping;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.opentelemetry.instrumentation.annotations.SpanAttribute;
-
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.Bucket;
-import java.util.List;
 
-
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URLConnection;
+import java.util.*;
 import java.net.URL;
-import java.util.Scanner;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 @RestController
 public class TracingDemonstrationController {
-    @RequestMapping("/goto/{url}")
-    public String processSingleURL(@PathVariable String url) throws Exception {
 
+    private final Log log = LogFactory.getLog(TracingDemonstrationController.class);
 
-        try {
-            String content = downloadWebData("https://" + url);
-            execS3APIs(url);
-            return content;
-        } catch (Exception e) {
-            return "failed to process, because: " + e;
+    @RequestMapping("/connect-to-all/")
+    public Map<String, String> processMultipleURLs() {
+
+        HashMap<String, String> responseMap = new HashMap<>();
+        List<String> websiteList = new ArrayList<>();
+
+        websiteList.add("https://amazon.com");
+        websiteList.add("https://google.com");
+        websiteList.add("https://doesnotexist-12345.com");
+        websiteList.add("https://localhost.com");
+
+        for (String nextWebsite : websiteList){
+            responseMap.put(nextWebsite, readWebData(nextWebsite));
         }
+
+        responseMap.put("S3 APIs", execS3APIs());
+
+        return responseMap;
     }
 
-    @RequestMapping("/gotoall/")
-    public String processMultipleURLs() throws Exception {
-        try {
-            downloadWebData("https://amazon.com");
-            downloadWebData("https://google.com");
-            downloadWebData("https://doesnotexist-12345.com");
-            downloadWebData("https://localhost.com");
-
-        } catch (Exception e) {
-            return "failed to process, because: " + e;
-        }
-
-        return "Done!";
+    @RequestMapping("/test/")
+    public String processTest() {
+        return "HELLO";
     }
 
 
     @WithSpan
-    private String downloadWebData(@SpanAttribute("webAddress") String webAddress)
-            throws Exception {
+    private String readWebData(@SpanAttribute("webAddress") String webAddress)
+    {
+        log.info("reading from: " + webAddress);
+        try{
 
-        URL url = new URL(webAddress);
-        Scanner sc = new Scanner(url.openStream());
+            URL url = new URL(webAddress);
+            URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(2000);
+            connection.setReadTimeout(2000);
 
-        StringBuffer sb = new StringBuffer();
-        while (sc.hasNext()) {
-            sb.append(sc.next());
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            while (in.readLine() != null);
+            in.close();
+
+            return "SUCCESS";
         }
-        return sb.toString();
+        catch (Exception e){
+            log.error("error reading website: " + e.getMessage());
+            return e.getMessage();
+        }
     }
 
     @WithSpan
-    private void execS3APIs(@SpanAttribute("webAddress") String webAddress) {
-
-        // S3
+    private String execS3APIs() {
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
 
-        List<Bucket> buckets = s3.listBuckets();
-        System.out.println("Your {S3} buckets are:");
-        for (Bucket b : buckets) {
-            System.out.println("* " + b.getName());
-        }
+        try{
+            List<Bucket> buckets = s3.listBuckets();
 
-        //EC2
+            log.info("Your {S3} buckets are:");
+            for (Bucket b : buckets) {
+                log.info("* " + b.getName());
+            }
+
+            return "SUCCESS";
+        }
+        catch(Exception e){
+            return e.getMessage();
+        }
     }
 }
