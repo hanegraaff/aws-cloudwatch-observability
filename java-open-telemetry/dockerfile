@@ -1,11 +1,17 @@
 FROM amazoncorretto:19
 
-#
 # Download the ADOT agent
-#
 RUN curl -LJO -o aws-opentelemetry-agent.jar github.com/aws-observability/aws-otel-java-instrumentation/releases/download/v1.20.0/aws-opentelemetry-agent.jar
 
+# Assemble to the image
 COPY ./target/demonstrationApp-1.0.0.jar demonstrationApp.jar
 COPY open-telemetry-java-agent.properties open-telemetry-java-agent.properties
 
-ENTRYPOINT ["java","-javaagent:aws-opentelemetry-agent.jar","-Dotel.javaagent.configuration-file=open-telemetry-java-agent.properties", "-jar","/demonstrationApp.jar"]
+# Set OTEL environment variables
+ENV OTEL_RESOURCE_ATTRIBUTES=service.name=demonstrationApp-docker,service.namespace=com.hanegraaff.observability,service.version=1.0.0
+
+# This is where the agent and its properties are set
+ENTRYPOINT ["java","-javaagent:aws-opentelemetry-agent.jar", \
+    "-Dotel.javaagent.configuration-file=otel-docker-java-agent.properties", \
+    "-Dotel.instrumentation.runtime-metrics.enabled=false", \
+    "-jar","/demonstrationApp.jar"]
