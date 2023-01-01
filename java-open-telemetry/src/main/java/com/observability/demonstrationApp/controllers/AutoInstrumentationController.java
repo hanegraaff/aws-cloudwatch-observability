@@ -25,7 +25,8 @@ public class TracingDemonstrationController {
     private final Log log = LogFactory.getLog(TracingDemonstrationController.class);
 
     @RequestMapping("/connect-to-all/")
-    public Map<String, String> processMultipleURLs() {
+    @WithSpan()
+    public Map<String, String> autoInstrumented() {
 
         HashMap<String, String> responseMap = new HashMap<>();
         List<String> websiteList = new ArrayList<>();
@@ -44,13 +45,7 @@ public class TracingDemonstrationController {
         return responseMap;
     }
 
-    @RequestMapping("/test/")
-    public String processTest() {
-        return "HELLO";
-    }
-
-
-    @WithSpan
+    @WithSpan()
     private String readWebData(@SpanAttribute("webAddress") String webAddress)
     {
         log.info("reading from: " + webAddress);
@@ -73,7 +68,6 @@ public class TracingDemonstrationController {
         }
     }
 
-    @WithSpan
     private String execS3APIs() {
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
 
