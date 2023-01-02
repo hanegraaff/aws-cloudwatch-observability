@@ -34,7 +34,7 @@ def rand_float(max):
 @metric_scope
 def generate_performance_metrics(metrics):
     
-    metrics.set_namespace("cpe.demoapp.api")
+    metrics.set_namespace("com.hanegraaff.demonstrationApp-Python.performance")
     api_names = ['ListBuckets', 'HeadObject', 'GetObject', 'PutObject', 'PutVesioning', 'ListObjects']
     metrics.set_dimensions({"AccountID": "1234567890", "Service": "S3", "APIName": random.choice(api_names)})
     
@@ -45,7 +45,7 @@ def generate_performance_metrics(metrics):
     
 @metric_scope
 def generate_business_metrics(metrics):
-    metrics.set_namespace("cpe.demoapp.business")
+    metrics.set_namespace("com.hanegraaff.demonstrationApp-Python.business")
     metrics.set_dimensions({"AccountID": "1234567890", "ServiceName": "S3", "Module": "Fix ABC problem"})
 
     metrics.put_metric("Remediated", rand_int(100), "Count")

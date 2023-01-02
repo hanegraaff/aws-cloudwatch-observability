@@ -19,6 +19,11 @@ import org.apache.commons.logging.LogFactory;
 public class AutoInstrumentationController {
     private final Log log = LogFactory.getLog(AutoInstrumentationController.class);
 
+    /**
+     * Request handler used to exercise the automatic tracing capabilities
+     * It will navidate to various URLs and then exercise an S3 API
+     * @return
+     */
     @RequestMapping("/auto-instrument-traces/")
     public Map<String, String> autoInstrumented() {
 
@@ -47,6 +52,7 @@ public class AutoInstrumentationController {
         return Connector.readHTTPData(webAddress);
     }
 
+    @WithSpan()
     private String execS3APIs() {
         return Connector.execS3APIs();
     }
