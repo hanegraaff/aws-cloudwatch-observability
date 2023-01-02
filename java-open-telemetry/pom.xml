@@ -15,7 +15,6 @@
 	<description>Spring Boot / Open Telemetry Demonstration app</description>
 	<properties>
 		<java.version>19</java.version>
-		<otel.version>1.21.0</otel.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -33,24 +32,28 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-bom</artifactId>
+			<version>1.21.0</version>
+			<type>pom</type>
+			<scope>import</scope>
+		</dependency>
+		<dependency>
 			<groupId>io.opentelemetry.instrumentation</groupId>
 			<artifactId>opentelemetry-instrumentation-annotations</artifactId>
-			<version>${otel.version}</version>
+			<version>1.21.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-sdk</artifactId>
-			<version>${otel.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-exporter-otlp</artifactId>
-			<version>${otel.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
-			<artifactId>opentelemetry-semconv</artifactId>
-			<version>1.20.1-alpha</version>
+			<artifactId>opentelemetry-sdk-extension-aws</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.amazonaws</groupId>

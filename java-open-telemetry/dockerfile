@@ -5,7 +5,7 @@ RUN curl -LJO -o aws-opentelemetry-agent.jar github.com/aws-observability/aws-ot
 
 # Assemble to the image
 COPY ./target/demonstrationApp-1.0.0.jar demonstrationApp.jar
-COPY open-telemetry-java-agent.properties open-telemetry-java-agent.properties
+COPY otel-docker-java-agent.properties otel-docker-java-agent.properties
 
 # Set OTEL environment variables
 ENV OTEL_RESOURCE_ATTRIBUTES=service.name=demonstrationApp-docker,service.namespace=com.hanegraaff.observability,service.version=1.0.0
