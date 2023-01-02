@@ -1,6 +1,7 @@
 package com.observability.demonstrationApp.controllers;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.metrics.DoubleHistogram;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ public class ManualInstrumentationController {
     private final Log log = LogFactory.getLog(ManualInstrumentationController.class);
 
     private OpenTelemetry openTelemetry;
-    LongCounter counter;
+    DoubleHistogram histogram;
 
     /**
      * Initialize OpenTelemetry. This code was taken from
@@ -34,7 +35,7 @@ public class ManualInstrumentationController {
         Meter meter =
                 GlobalOpenTelemetry.meterBuilder("aws-otel").setInstrumentationVersion("1.0").build();
 
-        counter = meter.counterBuilder("demonstration_metric")
+        histogram = meter.histogramBuilder("demonstration_metric_2")
                 .setDescription("A metric that represents nothing")
                 .setUnit("count")
                 .build();
@@ -47,7 +48,7 @@ public class ManualInstrumentationController {
 
         Attributes attributes = Attributes.of(AttributeKey.stringKey("Key"), "SomeWork");
 
-        counter.add(1000, attributes);
+        histogram.record(123.45, attributes);
 
         HashMap<String, String> responseMap = new HashMap<>();
         responseMap.put("foo", "bar");
