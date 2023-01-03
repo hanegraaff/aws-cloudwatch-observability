@@ -8,9 +8,22 @@ When running the app, Spring's Embedded Tomcat will listen on Port `8080` (http:
 * `http://localhost:8080/business-metrics/` 
 
 
-## Running the sample app as a standalone Java App
+## Running the sample app as a Docker container
+The simplest way to run the sample app is to run it as a Docker container. Using this method, both the AWS ADOT Collector and the sample app will be run together using Docker Compose.
+
+1. Build project and container:
+
+    ```cmd
+    >> build-docker.sh
+    ```
+
+2. Run the images:
+    ```
+    >> run-docker.sh
+    ```
 
 ## Running the sample app as a standalone Java App
+Alternatively, you can run the sample application as standalone application. There is no difference in functionality no matter how you run the application.
 
 1. Run the AWS OTEL Collector. The easiest way is to do so using in a Docker container:
 
