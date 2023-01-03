@@ -5,7 +5,20 @@ This repo contains a Sample Spring Boot Application instrumented with Open Telem
 When running the app, Spring's Embedded Tomcat will listen on Port `8080` (http://localhost:8080) and expose the following URL mappings:
 
 * `http://localhost:8080/auto-instrument-traces/`
-* `http://localhost:8080/business-metrics/` 
+* `http://localhost:8080/business-metrics/`
+
+The first mapping will prompt the sample app to connect to various URLs (some valid, some not), exercise some AWS APIs, and capture traces using Open Telemetry's automatic tracing capabilties and publish them to X-Ray.
+
+The second URL will generate some business metrics and publish them to CloudWatch.
+
+Additionally, the application will run a special method every 10 seconds and generate additional performance metrics which are also published to CloudWatch.
+
+## What is the output?
+The application mainly outputs Traces to X-Ray and Metrics to CloudWatch. Browsing to either of the two URLs will just trigger the process.
+
+### Traces Output
+
+### Metrics Output
 
 
 ## Running the sample app as a Docker container
