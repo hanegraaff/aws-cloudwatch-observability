@@ -1,4 +1,4 @@
-FROM amazoncorretto:11
+FROM amazoncorretto:17
 
 # Download the ADOT agent
 RUN curl -LJO -o aws-opentelemetry-agent.jar github.com/aws-observability/aws-otel-java-instrumentation/releases/download/v1.20.0/aws-opentelemetry-agent.jar
