@@ -19,7 +19,21 @@ The application mainly outputs Traces to X-Ray and Metrics to CloudWatch. Browsi
 ### Traces Output
 
 ### Metrics Output
+Metrics are stored in this namespace:
 
+```
+com.hanegraaff.observability/demonstrationApp-docker
+```
+
+And contain both metrics produced by the sample app as well as metrics produced by default by Open Telemetry. Note that I have not found a way to disable all of the default onces since don't appear to be very useful.
+
+The app publishes a total of three metrics using random values:
+
+* A `transaction_count` count organized by `ProductType` and `PaymentType` dimensions
+* A `response_time` organized by `ServiceName` and `Activity` dimensions
+* A `temperature` metric organized by a `Location` Dimension
+
+You can find the code [here](/java-open-telemetry/src/main/java/com/observability/demonstrationApp/controllers/ManualInstrumentationController.java)
 
 ## Running the sample app as a Docker container
 The simplest way to run the sample app is to run it as a Docker container. Using this method, both the AWS ADOT Collector and the sample app will be run together using Docker Compose.
@@ -31,7 +45,7 @@ The simplest way to run the sample app is to run it as a Docker container. Using
     ```
 
 2. Run the images:
-    ```
+    ```cmd
     >> run-docker.sh
     ```
 

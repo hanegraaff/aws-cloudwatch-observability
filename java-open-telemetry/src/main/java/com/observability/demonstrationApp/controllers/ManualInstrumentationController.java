@@ -99,7 +99,7 @@ public class ManualInstrumentationController {
         log.info("Publishing Performance Metrics");
         Attributes responseTimeAttributes =
                 Attributes.of(AttributeKey.stringKey("ServiceName"), serviceList.get(rand.nextInt(serviceList.size())),
-                AttributeKey.stringKey("ActivityList"), activityList.get(rand.nextInt(activityList.size()))
+                AttributeKey.stringKey("Activity"), activityList.get(rand.nextInt(activityList.size()))
         );
         responseTimeHistogram.record(rand.nextDouble(125), responseTimeAttributes);
 
