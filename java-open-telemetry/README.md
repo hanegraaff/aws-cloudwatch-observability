@@ -17,6 +17,9 @@ Additionally, the application will run a special method every 10 seconds and gen
 The application mainly outputs Traces to X-Ray and Metrics to CloudWatch. Browsing to either of the two URLs will just trigger the process.
 
 ### Traces Output
+Traces are stored using X-Ray. Here is a screenshot showing an example
+
+![Example Trace](doc/auto-instrumented-trace.png)
 
 ### Metrics Output
 Metrics are stored in this namespace:
