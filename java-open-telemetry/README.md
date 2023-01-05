@@ -1,5 +1,7 @@
 # Open Telemetry Spring Boot Sample Application
-This repo contains a Sample Spring Boot Application instrumented with Open Telemetry. The application can be run as a standard Java application or using a docker container.
+This repo contains a Sample Spring Boot Application instrumented with the AWS Distro for Open Telemetry (ADOT). The application can be run as a standard Java application or using a docker container. Further information on ADOT can be found here: 
+
+https://aws-otel.github.io
 
 ## What does the app do?
 When running the app, Spring's Embedded Tomcat will listen on Port `8080` (http://localhost:8080) and expose the following URL mappings:
@@ -73,3 +75,11 @@ Alternatively, you can run the sample application as standalone application. The
     >> build-n-run-local.sh
     ```
 
+## Development Notes
+
+1. The application relies on a Java Agent which is part of ADOT and is downloaded each time the artifact is build. You can see this inside `build-n-run-local.sh` and `docker-build.sh` The agent is used to provide automatic tracing capabilities.
+
+    https://github.com/aws-observability/aws-otel-java-instrumentation/
+
+
+2. The Agent does not require any special configuration, but when both the sample app and the collector are running inside Docker containers, it is configured to use `http://collector:4317` instead of `localhost`. This is configured inside [otel-docker-java-agent.properties](otel-docker-java-agent.properties) and is referenced inside the [dockerfile](dockerfile)
