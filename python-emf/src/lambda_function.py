@@ -6,14 +6,15 @@ from aws_embedded_metrics import metric_scope
 
 from aws_embedded_metrics.config import get_config
 Config = get_config()
-Config.log_group_name = "cpe-observability-metrics"
-Config.namespace = "cpe-observability-metrics"
+Config.log_group_name = "metrics/com/hanegraaff/observability/demonstrationApp-python"
+Config.namespace = "com.hanegraaff.observability.demonstrationApp-python"
 
 
 
 import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 client = boto3.client("s3")
 client = boto3.client("ec2")
@@ -23,13 +24,12 @@ client = boto3.client("dynamodb")
 # and metrics will be much higher
 error_mode = random.random() > 0.80
 
-namespace_name = "com.hanegraaff.observability.demonstrationApp-python"
-
 
 def lambda_handler(event, context):
     
     latency_metrics()
     transaction_metrics()
+    error_metrics()
 
     return {"message": "Hello!"}
     
@@ -42,63 +42,75 @@ def rand_float(min, max):
 @metric_scope
 def latency_metrics(metrics):
 
-    metrics.set_namespace(namespace_name)
-
     for _ in range(8):
         # DB Latency Metric
-        metrics.set_dimensions({"origin": "Database", "name" : "transaction-db"})
-        metrics.put_metric("latency", rand_float(5000, 10000) if error_mode else rand_float(500, 800), "ms")
+        metrics.set_dimensions(
+            {"origin": "Database", "name" : "transaction-db"}, 
+            {"origin": "Database"}, 
+            {"name" : "transaction-db"})
+
+        metrics.put_metric("latency", rand_float(5000, 10000) if error_mode else rand_float(500, 800), "Milliseconds")
 
     for _ in range(20):
         # Service Metrics
-        metrics.set_dimensions({"origin": "Service", "name" : random.choice(["pricing", "settlement", "netting", "client", "cache"])})
-        metrics.put_metric("latency", rand_float(1200, 6000) if error_mode else rand_float(300, 1000), "ms")
+        name = random.choice(["pricing", "settlement", "netting", "client", "cache"])
+        metrics.set_dimensions(
+            {"origin": "Service", "name" : name}, 
+            {"origin": "Service"},
+            {"name" : name})
+        metrics.put_metric("latency", rand_float(1200, 6000) if error_mode else rand_float(300, 1000), "Milliseconds")
 
         # Transactions Metrics
-        metrics.set_dimensions({"origin": "Transaction", "name" : random.choice(["order_execution", "order_execution", "order_execution", "order_update", "order_cancel"])})
-        metrics.put_metric("latency", rand_float(60000, 180000) if error_mode else rand_float(800, 1500), "ms")
+        name = random.choice(["order_execution", "order_execution", "order_execution", "order_update", "order_cancel"])
+        metrics.set_dimensions(
+            {"origin": "Transaction", "name" : name},
+            {"origin": "Transaction"},
+            {"name" : name},
+        )
+        metrics.put_metric("latency", rand_float(60000, 180000) if error_mode else rand_float(800, 1500), "Milliseconds")
         
 @metric_scope
 def transaction_metrics(metrics):
 
-    metrics.set_dimensions({
-            "cliend_id": random.choice(["Enron", "FTX", "Alameta", "Bernard L. Madoff Investment Securities LLC", "Top G. University"]),
-            "category": random.choice(["Cash", "Bonds", "Crypto", "Stock", "Options"])
-        })
-
     for i in range(rand_int(0, 25)):
-        metrics.put_metric("transactions", 0 if error_mode else 1, "count")
-        metrics.put_metric("outstanding transactions", rand_int(30, 150) if error_mode else rand_int(0, 5), "count")
+        client_id = random.choice(["Enron", "FTX", "Alameta", "Bernard L. Madoff Investment Securities LLC", "Top G. University"])
+        category = random.choice(["Cash", "Bonds", "Crypto", "Stock", "Options"])
+        metrics.set_dimensions({
+            "client_id": client_id,
+            "category": category
+        },
+        {
+            "client_id": client_id
+        },
+        {
+            "category": category
+        }
+    )
 
+        metrics.put_metric("transactions", 0 if error_mode else 1, "Count")
+        metrics.put_metric("outstanding transactions", rand_int(30, 150) if error_mode else rand_int(0, 5), "Count")
 
-@metric_scope
-def transaction_metrics(metrics):
-
-    metrics.set_dimensions({
-            "cliend": random.choice(["Enron", "FTX", "Alameta", "Bernard L. Madoff Investment Securities LLC", "Top G. University"]),
-            "categofy": random.choice(["Cash", "Bonds", "Crypto", "Stock", "Options"])
-        })
-
-    for i in range(rand_int(0, 20)):
-        if error_mode:
-            metrics.put_metric("transactions", 0, "count")
-        else:
-            metrics.put_metric("transactions", rand_int(0, 25), "count")
 
 @metric_scope
 def error_metrics(metrics):
+    
+    fatal = random.choice(["No", "No", "No", "No", "No", "No", "No", "No", "No", "Yes"])
+    type =  random.choice(["Netork", "Transaction", "Exception"])
 
     metrics.set_dimensions({
-            "fatal": random.choice([0, 1]),
-            "type": random.choice(["Service", "Transaction", "Maintenance"])
-        })
+            "fatal": fatal,
+            "type": type
+        },
+        {
+            "fatal": fatal
+        },
+        {
+            "type": type
+        }
+    )
+    
+    metrics.put_metric("errors", rand_int(0, 3) if error_mode else rand_int(25, 50), "Count")
 
-    for i in range(rand_int(0, 100)):
-        if error_mode:
-            metrics.put_metric("errors", rand_int(25, 50), "count")
-        else:
-            metrics.put_metric("errors", rand_int(0, 3), "count")
 
-
-
-lambda_handler(None, None)
+# uncomment to test locally
+# lambda_handler(None, None)
