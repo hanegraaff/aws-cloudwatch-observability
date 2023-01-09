@@ -82,4 +82,4 @@ Alternatively, you can run the sample application as standalone application. The
     https://github.com/aws-observability/aws-otel-java-instrumentation/
 
 
-2. The Agent does not require any special configuration, but when both the sample app and the collector are running inside Docker containers, it is configured to use `http://collector:4317` instead of `localhost`. This is configured inside [otel-docker-java-agent.properties](otel-docker-java-agent.properties) and is referenced inside the [dockerfile](dockerfile)
+2. The Agent does not require any special configuration, but when both the sample app and the collector are running inside Docker containers, it is configured to use `http://collector:4317` instead of `localhost` because of Docker DNS. This is configured inside [otel-docker-java-agent.properties](otel-docker-java-agent.properties) and is referenced inside the [dockerfile](dockerfile)
