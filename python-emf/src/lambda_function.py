@@ -2,6 +2,8 @@
 
 import boto3
 import random
+from typing import Union
+
 from aws_embedded_metrics import metric_scope
 from aws_embedded_metrics.config import get_config
 
@@ -32,9 +34,24 @@ error_mode = random.random() > 0.80
 
 
 def lambda_handler(event, context):
-    latency_metrics()
-    transaction_metrics()
-    error_metrics()
+
+    #
+    # Latency Metrics
+    #
+    publish_latency_metrics("Database", "transaction-db", rand_float(5000, 10000) if error_mode else rand_float(500, 800))
+
+    for name in ["pricing", "settlement", "netting", "client", "cache"]:
+        publish_latency_metrics("Service", name, rand_float(1200, 6000) if error_mode else rand_float(300, 1000))
+
+    for name in ["order_execution", "order_execution", "order_execution", "order_update", "order_cancel"]:
+        publish_latency_metrics("Transaction", name, rand_float(60000, 180000) if error_mode else rand_float(800, 1500))
+    
+    for client_id in ["Enron", "FTX", "Alameta", "Bernard L. Madoff Investment Securities LLC", "Top G. University"]:
+        for category in ["Cash", "Bonds", "Crypto", "Stock", "Options"]:
+            publish_transaction_metrics(client_id, category, rand_int(30, 150) if error_mode else rand_int(0, 5))
+
+    for type in ["Netork", "Transaction", "Exception"]:
+        publish_error_metrics(type, rand_int(25, 50) if error_mode else 0)
 
     try:
         make_aws_sdk_calls()
@@ -51,65 +68,39 @@ def rand_float(min, max):
     
 @metric_scope
 @xray_recorder.capture('Publishing Latency Metrics')
-def latency_metrics(metrics):
+def publish_latency_metrics(origin : str, name : str, metric_value : Union[int,float], metrics):
 
-    for _ in range(8):
-        # DB Latency Metric
-        metrics.set_dimensions(
-            {"origin": "Database", "name" : "transaction-db"}, 
-            {"origin": "Database"}, 
-            {"name" : "transaction-db"})
-
-        metrics.put_metric("latency", rand_float(5000, 10000) if error_mode else rand_float(500, 800), "Milliseconds")
-
-    for _ in range(20):
-        # Service Metrics
-        name = random.choice(["pricing", "settlement", "netting", "client", "cache"])
-        metrics.set_dimensions(
-            {"origin": "Service", "name" : name}, 
-            {"origin": "Service"},
-            {"name" : name})
-        metrics.put_metric("latency", rand_float(1200, 6000) if error_mode else rand_float(300, 1000), "Milliseconds")
-
-        # Transactions Metrics
-        name = random.choice(["order_execution", "order_execution", "order_execution", "order_update", "order_cancel"])
-        metrics.set_dimensions(
-            {"origin": "Transaction", "name" : name},
-            {"origin": "Transaction"},
-            {"name" : name},
-        )
-        metrics.put_metric("latency", rand_float(60000, 180000) if error_mode else rand_float(800, 1500), "Milliseconds")
-        
-@metric_scope
-@xray_recorder.capture('Publishing Transactions Metrics')
-def transaction_metrics(metrics):
-
-    for i in range(rand_int(0, 25)):
-        client_id = random.choice(["Enron", "FTX", "Alameta", "Bernard L. Madoff Investment Securities LLC", "Top G. University"])
-        category = random.choice(["Cash", "Bonds", "Crypto", "Stock", "Options"])
-        metrics.set_dimensions({
-            "client_id": client_id,
-            "category": category
-        },
-        {
-            "client_id": client_id
-        },
-        {
-            "category": category
-        }
+    metrics.set_dimensions(
+        {"origin": origin, "name" : name}, 
+        {"origin": origin}, 
+        {"name" : name}
     )
 
-        metrics.put_metric("transactions", 0 if error_mode else 1, "Count")
-        metrics.put_metric("outstanding transactions", rand_int(30, 150) if error_mode else rand_int(0, 5), "Count")
+    metrics.put_metric("latency", metric_value, "Milliseconds")
+
+@metric_scope
+@xray_recorder.capture('Publishing Transactions Metrics')
+def publish_transaction_metrics(client_id : str, category : str, metric_value : Union[int,float], metrics):
+    metrics.set_dimensions({
+        "client_id": client_id,
+        "category": category
+    },
+    {
+        "client_id": client_id
+    },
+    {
+        "category": category
+    })
+
+    metrics.put_metric("outstanding-transactions", metric_value, "Count")
 
 
 @metric_scope
 @xray_recorder.capture('Publishing Error Metrics')
-def error_metrics(metrics):
+def publish_error_metrics(type : str, metric_value : Union[int,float], metrics):
     
     fatal = random.choice(["No", "No", "No", "No", "No", "No", "No", "No", "No", "Yes"])
-    type =  random.choice(["Netork", "Transaction", "Exception"])
-
+    
     metrics.set_dimensions({
             "fatal": fatal,
             "type": type
@@ -121,8 +112,8 @@ def error_metrics(metrics):
             "type": type
         }
     )
-    
-    metrics.put_metric("errors", rand_int(0, 3) if error_mode else rand_int(25, 50), "Count")
+
+    metrics.put_metric("errors", metric_value, "Count")
 
 @xray_recorder.capture('Make AWS SDK Calls')
 def make_aws_sdk_calls():
@@ -131,7 +122,5 @@ def make_aws_sdk_calls():
     dynamodb_client.list_tables()
 
     
-
-
 # uncomment to test locally
 # lambda_handler(None, None)
